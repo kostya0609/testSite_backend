@@ -6,9 +6,12 @@ use Illuminate\Http\Request;
 class QuestionController extends Controller {
 
     public function list(Request $request){
-        return response()->json(['status' => 'success', 'data' => [
-            'mok_data_new' => 'it is ok new'
-        ]]);
+        return response()->json([
+            'success'     => true,
+            'data'        => [
+                'mok_data' => 'it is ok',
+            ],
+        ]);
     }
 
 
