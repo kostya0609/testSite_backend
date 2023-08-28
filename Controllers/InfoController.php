@@ -12,7 +12,7 @@ class InfoController extends Controller {
     public function get(Request $request){
 
         return response()->json(['status' => 'success', 'data' => [
-            'mok_data' => 'it is ok'
+            'mok_data_new' => 'it is ok new'
         ]]);
     }
 
