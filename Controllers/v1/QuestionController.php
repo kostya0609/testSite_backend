@@ -1,10 +1,10 @@
 <?php
 namespace App\Modules\Site\Controllers\v1;
 use App\Modules\Site\Action\v1\QuestionAction;
-use App\Modules\Site\Model\Log;
-
-use App\Http\Controllers\Controller;
 use App\Modules\Site\Model\Question;
+use App\Modules\Site\Model\Log;
+use App\Modules\Site\Model\Answer;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -51,58 +51,50 @@ class QuestionController extends Controller {
     }
 
     public function delete(Request $request){
+        $user_id     = $request->user_id;
         $question_id = $request->question_id;
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Вопрос удален' . $question_id,
-        ]);
+        if(!$user_id || !$question_id)
+            return response()->json([
+                'success'   => false,
+                'message'   => 'Нет user_id или нет question_id.',
+            ]);
+
+        DB::beginTransaction();
+        try {
+            Answer::where('question_id', '=', $question_id)->delete();
+            Question::where('id', '=', $question_id)->delete();
+
+            $log = new Log();
+            $logMessage = "Вопрос с ID $question_id был удален со всеми ответами";
+            $log->setLog(
+                $question_id,
+                $user_id,
+                $logMessage
+            );
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Вопрос успешно удален',
+            ]);
+
+        } catch (\Exception $e){
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+
+
     }
 
     public function list(Request $request){
 
-        // моковые данные для отладки фронта
-        $question_list = [
-            [
-                'id'       => 1,
-                'question' => 'q_1',
-                'answers'  => [
-                    ['id' => 1, 'answer' => 'a_11'],
-                    ['id' => 2, 'answer' => 'a_12'],
-                    ['id' => 3, 'answer' => 'a_13']
-                ]
-            ],
-            [
-                'id'       => 2,
-                'question' => 'q_2',
-                'answers'  => [
-                    ['id' => 4, 'answer' => 'a_21'],
-                    ['id' => 5, 'answer' => 'a_22'],
-                    ['id' => 6, 'answer' => 'a_23']
-                ]
-            ],
-            [
-                'id'       => 3,
-                'question' => 'q_2',
-                'answers'  => [
-                    ['id' => 7, 'answer' => 'a_31'],
-                    ['id' => 8, 'answer' => 'a_32'],
-                    ['id' => 9, 'answer' => 'a_33']
-                ]
-            ]
-
-        ];
+        $questionModels = Question::orderBy('id', 'asc')->with('answers')->get();
 
         return response()->json([
             'success' => true,
-            'data'    => $question_list,
+            'data'    => $questionModels,
         ]);
     }
 
-    public function save(Request $request){
-        return response()->json([
-            'success'     => true,
-            'message'     => 'Вопросы сохранены'
-        ]);
-    }
 }

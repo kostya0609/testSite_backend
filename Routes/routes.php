@@ -11,7 +11,6 @@ Route::prefix('site')
                     Route::post('add',QuestionController::class.'@add');
                     Route::post('delete',QuestionController::class.'@delete');
                     Route::post('list',QuestionController::class.'@list');
-                    Route::post('save',QuestionController::class.'@save');
                 });
 
                 Route::prefix('answers')->group(function (){
