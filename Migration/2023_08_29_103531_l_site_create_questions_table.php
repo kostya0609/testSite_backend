@@ -8,7 +8,7 @@ class CreateLSiteQuestions extends Migration {
     public function up(){
         Schema::create('l_site_questions', function (Blueprint $table) {
             $table->id();
-            $table->string('question');
+            $table->string('question')->nullable();
             $table->timestamps();
         });
     }

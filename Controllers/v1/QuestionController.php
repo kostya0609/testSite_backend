@@ -1,17 +1,53 @@
 <?php
 namespace App\Modules\Site\Controllers\v1;
+use App\Modules\Site\Action\v1\QuestionAction;
+use App\Modules\Site\Model\Log;
+
 use App\Http\Controllers\Controller;
+use App\Modules\Site\Model\Question;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class QuestionController extends Controller {
     public function add(Request $request){
-        return response()->json([
-            'success'     => true,
-            'data'        => [
-                'question_id' => rand(100, 1000),
-            ],
-            'message'     => 'Вопрос добавлен'
-        ]);
+        $user_id = $request->user_id;
+        $data    = $request->data;
+
+        if(!$user_id)
+            return response()->json([
+                'success'   => false,
+                'message'   => 'Нет user_id.',
+            ]);
+
+        DB::beginTransaction();
+        try {
+            $newQuestion = new Question();
+
+            $newQuestion = QuestionAction::setQuestion($newQuestion, $data);
+
+            $question_id = $newQuestion->id;
+
+            $log = new Log();
+            $logMessage = 'Новый вопрос добавлен';
+            $log->setLog(
+                $newQuestion->id,
+                $user_id,
+                $logMessage
+            );
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Успешно',
+                'data'    => [
+                    'question_id'=> $question_id
+                ],
+            ]);
+
+        } catch (\Exception $e){
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
 
     public function delete(Request $request){

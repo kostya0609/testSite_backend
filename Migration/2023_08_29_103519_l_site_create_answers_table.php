@@ -9,8 +9,8 @@ class CreateLSiteAnswers extends Migration {
         Schema::create('l_site_answers', function (Blueprint $table) {
             $table->id();
             $table->integer('question_id');
-            $table->string('answer');
-            $table->boolean('right');
+            $table->string('answer')->nullable();
+            $table->boolean('right')->nullable();
             $table->timestamps();
         });
     }
