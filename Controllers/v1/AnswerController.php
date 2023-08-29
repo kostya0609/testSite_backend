@@ -53,16 +53,47 @@ class AnswerController extends Controller{
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
 
+    }
 
-        $taskModel = Question::with(['dots.targets', 'dots.city', 'files'])->find($task_id);
+    public function edit(Request $request){
+        $user_id     = $request->user_id;
+        $answer_id   = $request->data['answer_id'];
+        $data        = $request->data;
 
-        return response()->json([
-            'success'     => true,
-            'data'        => [
-                'answer_id' => rand(100, 1000),
-            ],
-            'message'     => 'Ответ в вопрос добавлен'
-        ]);
+        if(!$user_id || !$answer_id)
+            return response()->json([
+                'success'   => false,
+                'message'   => 'Нет user_id или нет answer_id.',
+            ]);
+
+        DB::beginTransaction();
+        try {
+            $answerModel = Answer::find($answer_id);
+            $question_id = $answerModel->question->id;
+
+            if($data['answer']) $answerModel->answer = $data['answer'];
+            $answerModel->save();
+
+            $log = new Log();
+            $logMessage = "Содержание ответа c ID $answerModel->id на вопрос ID $question_id было изменено";
+            $log->setLog(
+                $question_id,
+                $user_id,
+                $logMessage
+            );
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Успешно',
+            ]);
+
+        } catch (\Exception $e){
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+
+
     }
 
     public function delete(Request $request){
@@ -92,7 +123,7 @@ class AnswerController extends Controller{
             DB::commit();
             return response()->json([
                 'success' => true,
-                'message' => 'Ответ успешно удален',
+                'message' => 'Успешно',
             ]);
 
         } catch (\Exception $e){

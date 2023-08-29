@@ -50,6 +50,46 @@ class QuestionController extends Controller {
         }
     }
 
+    public function edit(Request $request){
+        $user_id     = $request->user_id;
+        $question_id = $request->data['question_id'];
+        $data        = $request->data;
+
+        if(!$user_id || !$question_id)
+            return response()->json([
+                'success'   => false,
+                'message'   => 'Нет user_id или нет question_id.',
+            ]);
+
+        DB::beginTransaction();
+        try {
+            $questionModel = Question::find($question_id);
+
+            if($data['question']) $questionModel->question = $data['question'];
+            $questionModel->save();
+
+            $log = new Log();
+            $logMessage = 'Содержание вопроса было изменено';
+            $log->setLog(
+                $question_id,
+                $user_id,
+                $logMessage
+            );
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Успешно',
+            ]);
+
+        } catch (\Exception $e){
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+
+
+    }
+
     public function delete(Request $request){
         $user_id     = $request->user_id;
         $question_id = $request->question_id;
@@ -76,7 +116,7 @@ class QuestionController extends Controller {
             DB::commit();
             return response()->json([
                 'success' => true,
-                'message' => 'Вопрос успешно удален',
+                'message' => 'Успешно',
             ]);
 
         } catch (\Exception $e){
