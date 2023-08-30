@@ -4,7 +4,6 @@ namespace App\Modules\Site\Controllers\v1;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Site\Action\v1\AnswerAction;
-use App\Modules\Site\Model\Question;
 use App\Modules\Site\Model\Answer;
 use App\Modules\Site\Model\Log;
 use Illuminate\Http\Request;

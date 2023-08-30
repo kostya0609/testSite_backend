@@ -20,14 +20,17 @@ class PaddingController extends Controller{
 
         DB::beginTransaction();
         try {
-            $paddingModel = Padding::find($user_id);
+            $paddingModel = Padding::where('user_id', '=', $user_id)->first();
+
+            $padding_top    = $paddingModel ? $paddingModel->padding_top    : 0;
+            $padding_bottom = $paddingModel ? $paddingModel->padding_bottom : 0;
 
             return response()->json([
                 'success' => true,
                 'message' => 'Успешно',
                 'data'    => [
-                    'padding_top'    => $paddingModel ? $paddingModel->padding_top    : 0,
-                    'padding_bottom' => $paddingModel ? $paddingModel->padding_bottom : 0,
+                    'padding_top'    => $padding_top,
+                    'padding_bottom' => $padding_bottom,
                 ],
             ]);
 
@@ -38,26 +41,31 @@ class PaddingController extends Controller{
 
     }
 
-    public function edit(Request $request){
+    public function change(Request $request){
         $user_id        = $request->user_id;
 
-        $padding_top    = $request->data['padding_top'];
-        $padding_bottom = $request->data['padding_bottom'];
+        $padding_type   = $request->padding_type;
+        $padding_top    = $request->padding_top    ?: null;
+        $padding_bottom = $request->padding_bottom ?: null;
 
-        if(!$user_id && (!$padding_top || !$padding_bottom))
+        if(!$user_id )
             return response()->json([
                 'success'   => false,
-                'message'   => 'Нет user_id или нет значения нужного padding.',
+                'message'   => 'Нет user_id',
             ]);
 
         DB::beginTransaction();
         try {
-            $paddingModel = Padding::find($user_id) ?: new Padding();
+            $paddingModel = Padding::where('user_id', '=', $user_id)->first() ?: new Padding();
 
-            if($padding_top)    $paddingModel->padding_top    = $padding_top;
-            if($padding_bottom) $paddingModel->padding_bottom = $padding_bottom;
+            $paddingModel->user_id = $user_id;
+
+            if($padding_type === 'top')    $paddingModel->padding_top    = $padding_top;
+            if($padding_type === 'bottom') $paddingModel->padding_bottom = $padding_bottom;
+
             $paddingModel->save();
 
+            DB::commit();
             return response()->json([
                 'success' => true,
                 'message' => 'Успешно',
