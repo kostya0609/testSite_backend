@@ -16,8 +16,8 @@ class CreateLSitePaddings extends Migration {
 
             $table->id();
             $table->integer('user_id');
-            $table->integer('padding_top');
-            $table->integer('padding_bottom');
+            $table->integer('padding_top')->nullable();
+            $table->integer('padding_bottom')->nullable();
             $table->timestamps();
 
             /**

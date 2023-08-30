@@ -26,8 +26,8 @@ class PaddingController extends Controller{
                 'success' => true,
                 'message' => 'Успешно',
                 'data'    => [
-                    'padding_top'    => $paddingModel->padding_top,
-                    'padding_bottom' => $paddingModel->padding_bottom,
+                    'padding_top'    => $paddingModel ? $paddingModel->padding_top    : 0,
+                    'padding_bottom' => $paddingModel ? $paddingModel->padding_bottom : 0,
                 ],
             ]);
 
