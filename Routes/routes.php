@@ -19,6 +19,10 @@ Route::prefix('site')
                     Route::post('edit',AnswerController::class.'@edit');
                     Route::post('delete',AnswerController::class.'@delete');
                 });
+                Route::prefix('padding')->group(function (){
+                    Route::post('get',PaddingController::class.'@get');
+                    Route::post('change',PaddingController::class.'@change');
+                });
             });
 });
 
